@@ -282,6 +282,7 @@ revealing that the almost random results."
 
  (perform-substitution "./resources/tnl.txt" "./resources/swannsway.txt" "./output/swanns-way-through-the-night-land-custom-vectors-exclude-repeats.txt")
  (perform-substitution->html "./resources/tnl.txt" "./resources/swannsway.txt" "./output/swanns-way-through-the-night-land-custom-vectors-exclude-repeats.html")
+ (perform-substitution->html "./resources/tnl.txt" "./resources/good-bad.txt" "./output/good-bad-the-night-land.html")
 
  (gethash (intern "it's") vectors)
  ;; An example of extracting sentence data.
