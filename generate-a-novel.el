@@ -20,7 +20,21 @@ into a hash table indexed by the symbol for each word."
 
 ;; Load the word2vec vectors into memory and get their length
 ;;(load-word-vectors "/scratch/vectors.txt")
-(load-word-vectors "./resources/swtnl-vectors.txt")
+;;(load-word-vectors "./resources/swtnl-vectors.txt")
+
+(defvar word-counts nil)
+(defun load-word-counts (filename)
+  (let ((tbl (make-hash-table :test 'eql :size 20000))
+		(lines (with-current-buffer (find-file-noselect filename) (prog1 (cdr (buffer-all-lines)) (kill-buffer)))))
+	(loop while (car lines) 
+		  do
+		  (let* ((line-parts (split-string (pop lines) " " t))
+				 (ignore (message "%S" line-parts))
+				 (key (intern (car line-parts)))
+				 (count (string-to-number (cadr line-parts))))
+			(puthash key count tbl)))
+	(setf word-counts tbl)))
+;;(load-word-counts "./resources/all-word-counts.txt")
 
 
 (defun cos-dist (v1 v2)
@@ -83,6 +97,19 @@ are as different as possible."
 						   (aset vec i (+ (aref vec i) (aref wvec i)))))))
 	vec))
 
+(defun sentence->vector* (sntc)
+  "Convert a sentence to a vector by summing up its word vectors."
+  (let ((words (text->words sntc))
+		(vec (make-vector word-vector-length 0.0)))
+	(loop for word in words do 
+		  (let* ((sword (intern word))
+				 (wvec (gethash sword vectors))
+				 (count (gethash sword word-counts 10000)))
+			(if (and wvec (< count 600)) 
+				(loop for i from 0 below 200 do 
+					  (aset vec i (+ (aref vec i) (aref wvec i)))))))
+	vec))
+
 (example 
  (sentence->vector "Hello world"))
 
@@ -103,12 +130,12 @@ calculate their vectors.  Return the result as a list."
 						((start (car bnds))
 						 (end (cdr bnds))
 						 (sentence (buffer-substring-no-properties start end))
-						 (sentence-vector (sentence->vector sentence)))
+						 (sentence-vector-a (sentence->vector* sentence)))
 					  (make-sentence-data :sentence sentence
 									 :source file-name
 									 :start start
 									 :end end
-									 :vector sentence-vector)) sentences)
+									 :vector sentence-vector-a)) sentences)
 			  (forward-thing 'sentence)
 			  (setq bnds (bounds-of-thing-at-point 'sentence))
 			  finally 
@@ -116,12 +143,12 @@ calculate their vectors.  Return the result as a list."
 						(let* ((start (car bnds))
 							   (end (cdr bnds))
 							   (sentence (buffer-substring-no-properties start end))
-							   (sentence-vector (sentence->vector sentence)))
+							   (sentence-vector-a (sentence->vector* sentence)))
 						  (make-sentence-data :sentence sentence
 											  :source file-name
 											  :start start
 											  :end end
-											  :vector sentence-vector)) 
+											  :vector sentence-vector-a)) 
 						sentences)))
 		(reverse sentences)))))
 

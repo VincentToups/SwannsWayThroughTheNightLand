@@ -1,3 +1,12 @@
+# Update 17 Dec 2014
+
+I have regenerated Swann's Way Through The Night Land using comparison between sentences which uses only relatively uncommon words, under the assumption that these are more meaningful than words generally shared between the two novels in abundance.
+
+See file output/eliminte-common-words.html
+
+Incidentally, I switched some of the code over to the J language. 
+
+
 # Swann's Way Through The Night Land
 
 This project uses word2vec (ancillarily) and Emacs Lisp to generate a
